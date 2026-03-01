@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Admin Panel</title>
+
+<style>
+
+body{
+background:black;
+color:white;
+font-family:Arial;
+padding:40px;
+}
+
+/* HEADER */
+
+.header{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:40px;
+border-bottom:1px solid #333;
+padding-bottom:15px;
+
+}
+
+button{
+
+padding:10px 18px;
+background:#b6a3ff;
+border:none;
+cursor:pointer;
+margin:5px;
+
+}
+
+/* TABLE */
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-bottom:40px;
+}
+
+td,th{
+border:1px solid white;
+padding:10px;
+}
+
+input{
+padding:10px;
+width:300px;
+margin:5px 0;
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<!-- HEADER -->
+
+<div class="header">
+
+<h2>SkillSprint Admin</h2>
+
+<div>
+
+<button onclick="goHome()">Home</button>
+
+<button onclick="goCourses()">Courses</button>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+</div>
+
+
+
+<!-- USERS -->
+
+<h2>Users</h2>
+
+<button onclick="loadUsers()">Load Users</button>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Name</th>
+<th>Email</th>
+<th>Role</th>
+
+</tr>
+
+</thead>
+
+<tbody id="users"></tbody>
+
+</table>
+
+
+
+<!-- ADD COURSE -->
+
+<h2>Add Course</h2>
+
+<input id="courseName" placeholder="Course Name">
+<br>
+
+<input id="courseImage" placeholder="Image URL">
+<br>
+
+<input id="courseDesc" placeholder="Description">
+<br>
+
+<button onclick="addCourse()">Add Course</button>
+
+
+
+<!-- DELETE COURSE -->
+
+<h2>Delete Course</h2>
+
+<button onclick="loadCourses()">Show Courses</button>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Course Name</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="courses"></tbody>
+
+</table>
+
+
+
+<!-- ADD VIDEO -->
+
+<h2>Add Video</h2>
+
+<label>Select Course</label>
+<br>
+
+<select id="videoCourse"></select>
+
+<br><br>
+
+<input id="videoTitle" placeholder="Video Title">
+<br>
+
+<input id="videoId" placeholder="Youtube Video ID">
+<br>
+
+<button onclick="addVideo()">Add Video</button>
+
+
+<br><br>
+
+<h3>Videos in Selected Course</h3>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Title</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+<tbody id="courseVideos"></tbody>
+
+</table>
+
+
+<!-- DELETE VIDEO -->
+
+<h2>Delete Video</h2>
+
+<button onclick="loadVideos()">Show Videos</button>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Course</th>
+<th>Title</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="videos"></tbody>
+
+</table>
+
+
+
+<script>
+
+
+/* NAVIGATION */
+
+function goHome(){
+
+window.location="index.html";
+
+}
+
+function goCourses(){
+
+window.location="courses.html";
+
+}
+
+function logout(){
+
+window.location="login.html";
+
+}
+
+
+
+/* LOAD USERS */
+
+function loadUsers(){
+
+fetch("http://localhost:3000/users")
+
+.then(res=>res.json())
+
+.then(data=>{
+
+let html="";
+
+data.forEach(user=>{
+
+html+=`
+
+<tr>
+
+<td>${user.name}</td>
+
+<td>${user.email}</td>
+
+<td>${user.role}</td>
+
+</tr>
+
+`;
+
+});
+
+users.innerHTML=html;
+
+});
+
+}
+
+
+
+/* ADD COURSE */
+
+function addCourse(){
+
+fetch("http://localhost:3000/addCourse",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+name:courseName.value,
+image:courseImage.value,
+description:courseDesc.value
+
+})
+
+})
+
+.then(res=>res.text())
+
+.then(data=>alert(data));
+
+}
+
+
+
+/* LOAD COURSES */
+
+function loadCourses(){
+
+fetch("http://localhost:3000/courses")
+
+.then(res=>res.json())
+
+.then(data=>{
+
+let html="";
+
+data.forEach(course=>{
+
+html+=`
+
+<tr>
+
+<td>${course.name}</td>
+
+<td>
+
+<button onclick="deleteCourse('${course.name}')">
+
+Delete
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+courses.innerHTML=html;
+
+});
+
+}
+
+/* LOAD COURSES DROPDOWN */
+
+function loadCourseDropdown(){
+
+fetch("http://localhost:3000/courses")
+
+.then(res=>res.json())
+
+.then(data=>{
+
+let html="";
+
+data.forEach(course=>{
+
+html+=`<option>${course.name}</option>`;
+
+});
+
+videoCourse.innerHTML=html;
+
+/* Load videos of first course */
+
+loadCourseVideos();
+
+});
+
+}
+
+
+function loadCourseVideos(){
+
+const course = videoCourse.value;
+
+fetch("http://localhost:3000/videos/"+course)
+
+.then(res=>res.json())
+
+.then(data=>{
+
+let html="";
+
+data.forEach(video=>{
+
+html+=`
+
+<tr>
+
+<td>${video.title}</td>
+
+<td>
+
+<button onclick="deleteVideo('${video._id}')">
+
+Delete
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+courseVideos.innerHTML=html;
+
+});
+
+}
+
+loadCourseDropdown();
+
+
+videoCourse.addEventListener("change",loadCourseVideos);
+
+
+/* DELETE COURSE */
+
+function deleteCourse(name){
+
+fetch("http://localhost:3000/deleteCourse/"+name,{
+
+method:"DELETE"
+
+})
+
+.then(res=>res.text())
+
+.then(data=>{
+
+alert(data);
+
+loadCourses();
+
+});
+
+}
+
+
+
+/* ADD VIDEO */
+
+function addVideo(){
+
+fetch("http://localhost:3000/addVideo",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+course:videoCourse.value,
+title:videoTitle.value,
+videoId:videoId.value
+
+})
+
+})
+
+.then(res=>res.text())
+
+.then(data=>alert(data));
+
+}
+
+
+
+/* LOAD VIDEOS */
+
+function loadVideos(){
+
+fetch("http://localhost:3000/allVideos")
+
+.then(res=>res.json())
+
+.then(data=>{
+
+let html="";
+
+data.forEach(video=>{
+
+html+=`
+
+<tr>
+
+<td>${video.course}</td>
+
+<td>${video.title}</td>
+
+<td>
+
+<button onclick="deleteVideo('${video._id}')">
+
+Delete
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+videos.innerHTML=html;
+
+});
+
+}
+
+
+
+/* DELETE VIDEO */
+
+function deleteVideo(id){
+
+fetch("http://localhost:3000/deleteVideo/"+id,{
+
+method:"DELETE"
+
+})
+
+.then(res=>res.text())
+
+.then(data=>{
+
+alert(data);
+
+loadVideos();
+
+});
+
+}
+
+
+
+</script>
+
+</body>
+</html>
