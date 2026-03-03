@@ -173,21 +173,15 @@ await signInWithEmailAndPassword(auth,email,password);
 /* SAVE USER IN MONGO */
 
 fetch("http://localhost:3000/saveUser",{
-
 method:"POST",
-
 headers:{
 "Content-Type":"application/json"
 },
-
 body:JSON.stringify({
-
+uid: auth.currentUser.uid,
 name: auth.currentUser.displayName || "User",
-
 email: auth.currentUser.email
-
 })
-
 });
 
 
@@ -220,21 +214,15 @@ await signInWithPopup(auth,provider);
 /* SAVE USER IN MONGO */
 
 fetch("http://localhost:3000/saveUser",{
-
 method:"POST",
-
 headers:{
 "Content-Type":"application/json"
 },
-
 body:JSON.stringify({
-
+uid: auth.currentUser.uid,
 name: auth.currentUser.displayName,
-
 email: auth.currentUser.email
-
 })
-
 });
 
 

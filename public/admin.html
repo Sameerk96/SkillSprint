@@ -148,8 +148,59 @@ margin:5px 0;
 
 </table>
 
+<!-- COURSE REQUESTS -->
 
+<h2>Course Requests</h2>
 
+<button onclick="loadRequests()">
+
+Show Requests
+
+</button>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Student Email</th>
+
+<th>Course</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="requests"></tbody>
+
+</table>
+<!-- APPROVED STUDENTS -->
+
+<h2>Approved Students</h2>
+
+<button onclick="loadApproved()">
+Show Approved Students
+</button>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Student Email</th>
+<th>Approved Courses</th>
+
+</tr>
+
+</thead>
+
+<tbody id="approved"></tbody>
+
+</table>
 <!-- ADD VIDEO -->
 
 <h2>Add Video</h2>
@@ -283,6 +334,22 @@ users.innerHTML=html;
 
 function addCourse(){
 
+if(courseName.value.trim()==""){
+
+alert("Enter Course Name");
+
+return;
+
+}
+
+if(!courseImage.value.startsWith("http")){
+
+alert("Enter Valid Image URL");
+
+return;
+
+}
+
 fetch("http://localhost:3000/addCourse",{
 
 method:"POST",
@@ -293,9 +360,9 @@ headers:{
 
 body:JSON.stringify({
 
-name:courseName.value,
-image:courseImage.value,
-description:courseDesc.value
+name:courseName.value.trim(),
+image:courseImage.value.trim(),
+description:courseDesc.value.trim()
 
 })
 
@@ -303,10 +370,47 @@ description:courseDesc.value
 
 .then(res=>res.text())
 
-.then(data=>alert(data));
+.then(data=>{
+
+alert(data);
+
+loadCourses();
+
+});
 
 }
 
+fetch("http://localhost:3000/addCourse",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+name:courseName.value.trim(),
+image:courseImage.value.trim(),
+description:courseDesc.value.trim()
+
+})
+
+})
+
+.then(res=>res.text())
+
+.then(data=>{
+
+alert(data);
+
+courseName.value="";
+courseImage.value="";
+courseDesc.value="";
+
+loadCourses();
+
+});
 
 
 /* LOAD COURSES */
@@ -331,7 +435,7 @@ html+=`
 
 <td>
 
-<button onclick="deleteCourse('${course.name}')">
+<button onclick="deleteCourse('${encodeURIComponent(course.name)}')">
 
 Delete
 
@@ -551,6 +655,137 @@ loadVideos();
 }
 
 
+/* LOAD REQUESTS */
+
+function loadRequests(){
+
+fetch("http://localhost:3000/requests")
+
+.then(res=>res.json())
+
+.then(data=>{
+
+let html="";
+
+data.forEach(user=>{
+
+if(user.requestedCourses){
+
+user.requestedCourses.forEach(course=>{
+
+html+=`
+
+<tr>
+
+<td>${user.email}</td>
+
+<td>${course}</td>
+
+<td>
+
+<button onclick="approve(
+'${user.email}',
+'${course}'
+)">
+
+Approve
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+});
+
+requests.innerHTML=html;
+
+});
+
+}
+
+
+/* APPROVE COURSE */
+
+function approve(email,course){
+
+fetch("http://localhost:3000/approveCourse",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+email:email,
+course:course
+
+})
+
+})
+
+.then(res=>res.text())
+
+.then(data=>{
+
+alert("Course Approved");
+
+loadRequests(); // refresh table
+
+});
+
+}
+/* LOAD APPROVED STUDENTS */
+
+
+
+function loadApproved(){
+
+fetch("http://localhost:3000/users")
+
+.then(res=>res.json())
+
+.then(data=>{
+
+let html="";
+
+data.forEach(user=>{
+
+if(user.approvedCourses && user.approvedCourses.length>0){
+
+html+=`
+
+<tr>
+
+<td>${user.email}</td>
+
+<td>
+
+${user.approvedCourses.join(", ")}
+
+</td>
+
+</tr>
+
+`;
+
+}
+
+});
+
+approved.innerHTML=html;
+
+});
+
+}
 
 </script>
 

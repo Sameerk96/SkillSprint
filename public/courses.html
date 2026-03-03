@@ -292,10 +292,23 @@ header p{
   <a href="signup.html" id="signupLink">Signup</a>
 
   <!-- Profile (hidden by default) -->
-  <span id="userProfile" class="profile" style="display:none;">
-  <span id="userName">User</span>
-  <img id="userPhoto" src="" alt="Profile">
-</span>
+ <div id="userProfile"
+style="
+display:none;
+width:38px;
+height:38px;
+border-radius:50%;
+background:#b6a3ff;
+color:black;
+font-weight:bold;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+">
+
+A
+
+</div>
 </div>
 </nav>
 
@@ -308,129 +321,8 @@ header p{
 <!-- COURSES -->
 <section class="courses" id="coursesContainer">
 
-  <!-- 1 -->
-  <div class="course">
-    <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97">
-    <div class="course-content">
-      <span class="tag">Beginner</span>
-      <h3>Web Development</h3>
-      <p>HTML, CSS & JavaScript with modern projects.</p>
-      <div class="info"><span>⏱ 8 Weeks</span><span>⭐ 4.8</span></div>
-      <button>View Course</button>
-    </div>
-  </div>
-
-  <!-- 2 -->
-  <div class="course">
-    <img src="https://images.unsplash.com/photo-1526378722484-bd91ca387e72">
-    <div class="course-content">
-      <span class="tag">Popular</span>
-      <h3>Python Programming</h3>
-      <p>Automation, scripting & problem solving.</p>
-      <div class="info"><span>⏱ 6 Weeks</span><span>⭐ 4.9</span></div>
-      <button onclick="window.location.href='python-course.html';">
-   View Course
-</button>
-    </div>
-  </div>
-
-  <!-- 3 -->
-  <div class="course">
-    <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c">
-    <div class="course-content">
-      <span class="tag">Advanced</span>
-      <h3>Full Stack Development</h3>
-      <p>Frontend, backend, APIs & real-world apps.</p>
-      <div class="info"><span>⏱ 12 Weeks</span><span>⭐ 4.7</span></div>
-      <button>View Course</button>
-    </div>
-  </div>
-
-  <!-- 4 -->
-  <div class="course">
-    <img src="https://images.unsplash.com/photo-1534751516642-a1af1ef26a56">
-    <div class="course-content">
-      <span class="tag">Trending</span>
-      <h3>Data Science</h3>
-      <p>Data analysis, visualization & ML basics.</p>
-      <div class="info"><span>⏱ 10 Weeks</span><span>⭐ 4.6</span></div>
-      <button>View Course</button>
-    </div>
-  </div>
-
-  <!-- 5 -->
-  <div class="course">
-    <img src="https://images.unsplash.com/photo-1518779578993-ec3579fee39f">
-    <div class="course-content">
-      <span class="tag">Beginner</span>
-      <h3>UI / UX Design</h3>
-      <p>Design modern interfaces using Figma & UX principles.</p>
-      <div class="info"><span>⏱ 5 Weeks</span><span>⭐ 4.7</span></div>
-  
-    </div>
-  </div>
-
-  <!-- 6 -->
-  <div class="course">
-    <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c">
-    <div class="course-content">
-      <span class="tag">Popular</span>
-      <h3>Machine Learning</h3>
-      <p>Algorithms, models & real-world ML projects.</p>
-      <div class="info"><span>⏱ 9 Weeks</span><span>⭐ 4.8</span></div>
-      <button>View Course</button>
-    </div>
-  </div>
-
-  <!-- 7 -->
-  <div class="course">
-    <img src="https://images.unsplash.com/photo-1551434678-e076c223a692">
-    <div class="course-content">
-      <span class="tag">Trending</span>
-      <h3>Cloud Computing</h3>
-      <p>AWS, cloud architecture & deployment basics.</p>
-      <div class="info"><span>⏱ 7 Weeks</span><span>⭐ 4.6</span></div>
-      <button>View Course</button>
-    </div>
-  </div>
-
-  <!-- 8 -->
-  <div class="course">
-    <img src="https://images.unsplash.com/photo-1600267165477-6d4cc741b379">
-    <div class="course-content">
-      <span class="tag">Advanced</span>
-      <h3>Cyber Security</h3>
-      <p>Ethical hacking, security tools & best practices.</p>
-      <div class="info"><span>⏱ 11 Weeks</span><span>⭐ 4.9</span></div>
-      <button>View Course</button>
-    </div>
-  </div>
-
-  <!-- 9 -->
-  <div class="course">
-    <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085">
-    <div class="course-content">
-      <span class="tag">Beginner</span>
-      <h3>Java Programming</h3>
-      <p>Core Java, OOP concepts & backend foundations.</p>
-      <div class="info"><span>⏱ 6 Weeks</span><span>⭐ 4.5</span></div>
-      <button>View Course</button>
-    </div>
-  </div>
-
-  <!-- 10 -->
-  <div class="course">
-    <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c">
-    <div class="course-content">
-      <span class="tag">Professional</span>
-      <h3>DevOps Engineering</h3>
-      <p>CI/CD, Docker, Kubernetes & automation.</p>
-      <div class="info"><span>⏱ 10 Weeks</span><span>⭐ 4.8</span></div>
-      <button>View Course</button>
-    </div>
-  </div>
-
 </section>
+    
 
 <!-- FOOTER -->
 <footer class="footer">
@@ -523,9 +415,7 @@ onAuthStateChanged(auth, (user) => {
   const loginLink = document.getElementById("loginLink");
   const signupLink = document.getElementById("signupLink");
   const userProfile = document.getElementById("userProfile");
-  const userName = document.getElementById("userName");
-  const userPhoto = document.getElementById("userPhoto");
-
+  
   if(user){
     // hide login/signup
     loginLink.style.display = "none";
@@ -534,14 +424,10 @@ onAuthStateChanged(auth, (user) => {
     // show profile
     userProfile.style.display = "flex";
 
-    // name
-    userName.textContent =
-      user.displayName || user.email.split("@")[0];
+   const name = user.displayName || user.email;
 
-    // photo
-    userPhoto.src =
-      user.photoURL ||
-      "https://ui-avatars.com/api/?name=" + userName.textContent;
+userProfile.innerText =
+name.charAt(0).toUpperCase();
   }else{
     loginLink.style.display = "inline-block";
     signupLink.style.display = "inline-block";
@@ -564,7 +450,7 @@ html+=`
 
 <div class="course">
 
-<img src="${course.image}">
+<img src="${course.image}" onerror="this.src='https://via.placeholder.com/400x200'">
 
 <div class="course-content">
 

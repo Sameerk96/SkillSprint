@@ -374,16 +374,93 @@ copyright{
 <nav>
   <strong>𝕊𝕜𝕚𝕝𝕝𝕊𝕡𝕣𝕚𝕟𝕥.</strong>
 
-  <!-- Guest Links -->
-  <div id="guestLinks">
-    <a href="login.html">Login</a>
-    <a href="signup.html">Signup</a>
-    <a href="#contact">Contact</a>
-  </div>
+<div id="navRight" style="display:flex;align-items:center;gap:20px;position:relative;">
 
-  <!-- User Area -->
-  <div id="userArea" style="display:none;"></div>
+<div id="guestLinks">
+
+<a href="login.html">Login</a>
+<a href="signup.html">Signup</a>
+<a href="#contact">Contact</a>
+
+</div>
+
+<!-- PROFILE INITIAL -->
+
+<div id="userProfile"
+
+style="
+display:none;
+width:38px;
+height:38px;
+border-radius:50%;
+background:#b6a3ff;
+color:black;
+font-weight:bold;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+">
+
+A
+
+</div>
+<!-- PROFILE INFO TOOLTIP -->
+
+<div id="profileInfo"
+
+style="
+display:none;
+position:absolute;
+top:70px;
+right:60px;
+background:#111;
+padding:15px 20px;
+border-radius:12px;
+border:1px solid #333;
+min-width:220px;
+z-index:2000;
+">
+
+<p id="profileName"
+style="margin:0;font-weight:600;"></p>
+
+<p id="profileEmail"
+style="margin:5px 0 0 0;font-size:13px;color:#aaa;"></p>
+
+</div>
+<!-- LOGOUT DROPDOWN -->
+
+<div id="logoutBox"
+
+style="
+display:none;
+position:absolute;
+top:70px;
+right:0px;
+background:#111;
+padding:15px;
+border-radius:10px;
+border:1px solid #333;
+z-index:2000;
+">
+
+<button onclick="logout()"
+style="
+padding:10px 20px;
+border:none;
+background:#b6a3ff;
+border-radius:20px;
+cursor:pointer;
+">
+
+Logout
+
+</button>
+
+</div>
+
 </nav>
+
 <!-- HERO -->
 <section class="hero" id="home">
   <h1 class="reveal active">Your Tech Journey<br>Starts Here</h1>
@@ -567,101 +644,140 @@ window.addEventListener('scroll', () => {
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
 <script>
+
 const firebaseConfig = {
   apiKey: "AIzaSyBBb-HWoQ9TqwwkDk887G0oPeGvJo7hMfs",
   authDomain: "skillsprint-a4eb3.firebaseapp.com",
   projectId: "skillsprint-a4eb3",
-  storageBucket: "skillsprint-a4eb3.firebasestorage.app",
+  storageBucket: "skillsprint-a4eb3.appspot.com",
   messagingSenderId: "99219317801",
   appId: "1:99219317801:web:85ed7c3b7d062a69216838"
 };
 
 firebase.initializeApp(firebaseConfig);
+
 const auth = firebase.auth();
 
-/* 🔐 AUTH CHECK */
+
+
+/* LOGIN CHECK */
+
 auth.onAuthStateChanged(user=>{
- auth.onAuthStateChanged(user=>{
-  if(user){
 
-    // user logged in
-    document.getElementById("guestLinks").style.display="none";
+if(user){
+  document.getElementById("profileName").innerText =
+user.displayName || "User";
 
-    document.getElementById("userArea").style.display="flex";
+document.getElementById("profileEmail").innerText =
+user.email;
 
+guestLinks.style.display="none";
 
-    document.getElementById("userArea").innerHTML = `
+userProfile.style.display="flex";
 
-      <span>${user.displayName || user.email}</span>
+const name=user.displayName || user.email;
 
-      <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
+userProfile.innerText=
 
-      <button onclick="logout()">Logout</button>
+name.charAt(0).toUpperCase();
 
-    `;
+fetch("http://localhost:3000/saveUser",{
 
+method:"POST",
 
-    /* ⭐ SAVE USER TO MONGODB */
+headers:{
+"Content-Type":"application/json"
+},
 
-    fetch("http://localhost:3000/saveUser",{
+body:JSON.stringify({
 
-    method:"POST",
+uid:user.uid,
+name:user.displayName || "User",
+email:user.email
 
-    headers:{
-    "Content-Type":"application/json"
-    },
+})
 
-    body:JSON.stringify({
+})
+.then(res=>res.text())
+.then(data=>console.log(data));
 
-    name:user.displayName || "User",
+}else{
 
-    email:user.email,
+guestLinks.style.display="block";
 
-    role:"user"
+userProfile.style.display="none";
 
-    })
-
-    });
-
-  }
-});
-
-/* 🚪 LOGOUT */
-function logout(){
-  auth.signOut().then(()=>{
-    window.location.reload();
-  });
 }
-const getStartedBtn = document.getElementById("getStartedBtn");
 
-auth.onAuthStateChanged(user => {
-    
-  if(getStartedBtn){
-    if(user){
-      // ✅ Already logged in → Courses
-      getStartedBtn.onclick = () => {
-        window.location.href = "courses.html";
-      };
-      getStartedBtn.innerText = "Continue learning";
-    }else{
-      // ❌ Not logged in → Signup
-      getStartedBtn.onclick = () => {
-        window.location.href = "signup.html";
-      };
-      getStartedBtn.innerText = "Get Started";
-    }
-  }
 });
+
+
+
+/* PROFILE CLICK */
+
+userProfile.onclick=function(){
+  const profileInfo = document.getElementById("profileInfo");
+
+/* SHOW ON HOVER */
+userProfile.addEventListener("mouseenter",()=>{
+profileInfo.style.display="block";
+});
+
+/* HIDE WHEN LEAVE */
+userProfile.addEventListener("mouseleave",()=>{
+profileInfo.style.display="none";
+});
+
+/* ALSO HIDE WHEN LEAVING INFO BOX */
+profileInfo.addEventListener("mouseleave",()=>{
+profileInfo.style.display="none";
+});
+
+logoutBox.style.display=
+
+logoutBox.style.display=="block"
+
+?"none"
+
+:"block";
+
+}
+
+
+/* LOGOUT */
+
+function logout(){
+
+auth.signOut();
+
+window.location="index.html";
+
+}
+
+
+/* GET STARTED BUTTON */
+
+const btn=document.getElementById("getStartedBtn");
+
+
+
+
+
 function openContact(){
-  document.getElementById("contactModal").classList.add("active");
+
+contactModal.classList.add("active");
+
 }
 
 function closeContact(){
-  document.getElementById("contactModal").classList.remove("active");
+
+contactModal.classList.remove("active");
+
 }
+
 </script>
+
 <!-- CONTACT MODAL -->
 <div id="contactModal" class="contact-modal">
   <div class="contact-box">

@@ -204,13 +204,69 @@ allowfullscreen>
 
 </div>
 
-</div>
+<br>
+
+<center>
+
+<button id="buyBtn"
+
+style="
+padding:14px 40px;
+background:#b6a3ff;
+border:none;
+border-radius:25px;
+font-size:16px;
+cursor:pointer;
+"
+
+onclick="buyCourse()"
+
+>
+
+Buy Course
+
+</button>
+
+</center>
 
 </div>
 
+</div>
 
 
-<script>
+<script type="module">
+
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
+import {
+getAuth,
+onAuthStateChanged
+} from
+"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+
+const firebaseConfig = {
+
+apiKey:"AIzaSyBBb-HWoQ9TqwwkDk887G0oPeGvJo7hMfs",
+
+authDomain:"skillsprint-a4eb3.firebaseapp.com",
+
+projectId:"skillsprint-a4eb3",
+
+storageBucket:"skillsprint-a4eb3.appspot.com",
+
+messagingSenderId:"99219317801",
+
+appId:"1:99219317801:web:85ed7c3b7d062a69216838"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth=getAuth(app);
+
+window.auth=auth;
 
 
 /* GET COURSE NAME */
@@ -219,9 +275,37 @@ const params=new URLSearchParams(window.location.search);
 
 const course=params.get("name");
 
+courseTitle.innerText=course;
 
-document.getElementById("courseTitle").innerText=course;
 
+
+/* WAIT FOR LOGIN */
+
+onAuthStateChanged(auth,(user)=>{
+
+let email="";
+
+if(user){
+
+email=user.email;
+
+buyBtn.innerText="Buy Course";
+
+}else{
+
+buyBtn.innerText="Login to Buy";
+
+}
+
+
+
+/* CHECK ACCESS */
+
+fetch("http://localhost:3000/checkAccess?email="+email+"&course="+course)
+
+.then(res=>res.text())
+
+.then(access=>{
 
 
 /* LOAD VIDEOS */
@@ -236,18 +320,28 @@ let html="";
 
 data.forEach((video,index)=>{
 
-
 html+=`
 
 <div class="chapter
-
 ${index==0?'active':''}"
 
-onclick="playVideo('${video.videoId}',this)"
+onclick="${
+access=="yes"
+?
+`playVideo('${video.videoId}',this)`
+:
+(index==0
+?
+`playVideo('${video.videoId}',this)`
+:
+`alert('Course Locked 🔒')`
+)
+}"
 
 >
 
 ${index+1}. ${video.title}
+${access=="yes" ? "" : (index>0?" 🔒":"")}
 
 </div>
 
@@ -255,33 +349,48 @@ ${index+1}. ${video.title}
 
 });
 
+videoList.innerHTML=html;
 
-document.getElementById("videoList").innerHTML=html;
 
-
-/* FIRST VIDEO AUTO LOAD */
+/* FIRST VIDEO */
 
 if(data.length>0){
 
-document.getElementById("videoPlayer").src=
+videoPlayer.src=
 
 "https://www.youtube.com/embed/"+data[0].videoId;
+
+}
+
+
+/* IF APPROVED */
+
+if(access=="yes"){
+
+buyBtn.innerText="Enrolled ✅";
+
+buyBtn.disabled=true;
+
+buyBtn.style.background="green";
 
 }
 
 });
 
 
+});
+
+});
+
+
+
 /* PLAY VIDEO */
 
-function playVideo(id,element){
+window.playVideo=function(id,element){
 
-document.getElementById("videoPlayer").src=
+videoPlayer.src=
 
 "https://www.youtube.com/embed/"+id;
-
-
-/* ACTIVE CHAPTER */
 
 document.querySelectorAll(".chapter")
 
@@ -292,7 +401,58 @@ element.classList.add("active");
 }
 
 
+/* BUY COURSE */
+
+window.buyCourse=function(){
+
+const user=auth.currentUser;
+
+if(!user){
+
+alert("Please Login First");
+
+window.location="login.html";
+
+return;
+
+}
+
+fetch("http://localhost:3000/requestCourse",{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+email:user.email,
+course:course
+
+})
+
+})
+
+.then(res=>res.text())
+
+.then(data=>{
+
+alert(data);
+
+buyBtn.innerText="Requested ⏳";
+
+buyBtn.disabled=true;
+
+});
+
+}
+
 </script>
+
+
 
 
 </body>

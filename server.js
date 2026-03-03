@@ -16,12 +16,17 @@ mongoose.connect("mongodb://127.0.0.1:27017/skillsprint")
 
 
 /* User Model */
-
 const User = mongoose.model("User",{
-    name:String,
-    email:String,
-    password:String,
-    role:String
+
+uid:String,
+name:String,
+email:String,
+password:String,
+role:{type:String,default:"user"},
+
+requestedCourses:[String],
+approvedCourses:[String]
+
 });
 
 
@@ -82,23 +87,25 @@ res.json(users);
 app.post("/saveUser", async(req,res)=>{
 
 const exists = await User.findOne({
-email:req.body.email
+uid:req.body.uid
 });
 
 if(!exists){
 
 const user = new User({
 
+uid:req.body.uid,
 name:req.body.name,
 email:req.body.email,
-password:"",
-role:"user"
+role:"user",
+requestedCourses:[],
+approvedCourses:[]
 
 });
 
 await user.save();
 
-console.log("Firebase user saved");
+console.log("User saved in MongoDB");
 
 }
 
@@ -129,6 +136,28 @@ videoId:String
 /* ADD COURSE */
 
 app.post("/addCourse",async(req,res)=>{
+
+if(!req.body.name){
+
+res.send("Course Name Required");
+
+return;
+
+}
+
+const exists = await Course.findOne({
+
+name:req.body.name
+
+});
+
+if(exists){
+
+res.send("Course Already Exists");
+
+return;
+
+}
 
 const course = new Course({
 
@@ -237,7 +266,86 @@ res.json(videos);
 
 });
 
+app.post("/approveCourse", async(req,res)=>{
+
+await User.updateOne(
+
+{email:req.body.email},
+
+{
+
+$addToSet:{approvedCourses:req.body.course},
+
+$pull:{requestedCourses:req.body.course}
+
+}
+
+);
+
+res.send("Approved");
+
+});
+
+
+
+/* REQUEST COURSE */
+
+app.post("/requestCourse", async(req,res)=>{
+
+console.log("Incoming Request:", req.body);
+
+await User.updateOne(
+
+{email:req.body.email},
+
+{$addToSet:{requestedCourses:req.body.course}}
+
+);
+
+res.send("Request Saved");
+
+});
+
+
+/* GET REQUESTS */
+
+app.get("/requests", async(req,res)=>{
+
+const users = await User.find({
+
+requestedCourses:{$exists:true,$ne:[]}
+
+});
+
+res.json(users);
+
+});
+/* CHECK ACCESS */
+
+app.get("/checkAccess", async(req,res)=>{
+
+const user = await User.findOne({
+
+email:req.query.email
+
+});
+
+if(user && user.approvedCourses &&
+user.approvedCourses.includes(req.query.course)){
+
+res.send("yes");
+
+}else{
+
+res.send("no");
+
+}
+
+});
+
 
 app.listen(3000,()=>{
+
 console.log("Server Running");
+
 });
