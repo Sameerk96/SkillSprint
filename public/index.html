@@ -661,26 +661,32 @@ const auth = firebase.auth();
 
 
 
+
 /* LOGIN CHECK */
 
-auth.onAuthStateChanged(user=>{
+auth.onAuthStateChanged(user => {
 
 if(user){
-  document.getElementById("profileName").innerText =
+
+document.getElementById("profileName").innerText =
 user.displayName || "User";
 
 document.getElementById("profileEmail").innerText =
 user.email;
 
 guestLinks.style.display="none";
-
 userProfile.style.display="flex";
 
-const name=user.displayName || user.email;
+const name = user.displayName || user.email;
 
-userProfile.innerText=
-
+userProfile.innerText =
 name.charAt(0).toUpperCase();
+
+/* BUTTON CHANGE */
+btn.innerText = "Continue Learning";
+btn.onclick = function(){
+  window.location.href = "courses.html";
+};
 
 fetch("http://localhost:3000/saveUser",{
 
@@ -705,8 +711,13 @@ email:user.email
 }else{
 
 guestLinks.style.display="block";
-
 userProfile.style.display="none";
+
+/* DEFAULT BUTTON */
+btn.innerText = "Get Started";
+btn.onclick = function(){
+  window.location.href = "signup.html";
+};
 
 }
 
