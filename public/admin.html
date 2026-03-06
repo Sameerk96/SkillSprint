@@ -6,34 +6,78 @@
 
 <style>
 
+*{
+box-sizing:border-box;
+}
+
 body{
-background:black;
-color:white;
-font-family:Arial;
+margin:0;
+background:#0f0f14;
+color:#ffffff;
+font-family:'Segoe UI',Arial;
+}
+
+/* CONTENT CONTAINER */
+
+.container{
 padding:40px;
 }
 
-/* HEADER */
+/* NAVBAR */
 
-.header{
-
+.navbar{
+width:100%;
 display:flex;
 justify-content:space-between;
 align-items:center;
-margin-bottom:40px;
-border-bottom:1px solid #333;
-padding-bottom:15px;
-
+padding:18px 40px;
+background:black;
+border-bottom:1px solid #222;
+position:sticky;
+top:0;
+z-index:100;
 }
 
-button{
-
-padding:10px 18px;
-background:#b6a3ff;
-border:none;
+.logo{
+font-size:22px;
+font-weight:600;
+letter-spacing:1px;
 cursor:pointer;
-margin:5px;
+}
 
+.nav-links{
+display:flex;
+gap:30px;
+}
+
+.nav-links a{
+color:white;
+text-decoration:none;
+font-size:16px;
+transition:0.3s;
+}
+
+.nav-links a:hover{
+color:#b6a3ff;
+}
+
+/* BUTTONS */
+
+button{
+padding:10px 18px;
+background:linear-gradient(45deg,#7c5cff,#a78bfa);
+border:none;
+border-radius:6px;
+cursor:pointer;
+color:white;
+font-weight:500;
+transition:0.3s;
+margin:5px;
+}
+
+button:hover{
+transform:scale(1.05);
+box-shadow:0 0 10px rgba(167,139,250,0.6);
 }
 
 /* TABLE */
@@ -42,17 +86,57 @@ table{
 width:100%;
 border-collapse:collapse;
 margin-bottom:40px;
+background:#1b1b24;
+border-radius:8px;
+overflow:hidden;
+box-shadow:0 0 15px rgba(0,0,0,0.3);
 }
 
-td,th{
-border:1px solid white;
-padding:10px;
+thead{
+background:#262633;
 }
 
-input{
+th{
+padding:14px;
+text-align:left;
+font-weight:500;
+border-bottom:1px solid #333;
+}
+
+td{
+padding:12px;
+border-bottom:1px solid #2c2c38;
+}
+
+tr:hover{
+background:#242432;
+}
+
+/* INPUT */
+
+input,select{
 padding:10px;
-width:300px;
-margin:5px 0;
+width:320px;
+margin:6px 0;
+border:none;
+border-radius:6px;
+background:#262633;
+color:white;
+outline:none;
+transition:0.2s;
+}
+
+input:focus,select:focus{
+box-shadow:0 0 5px #7c5cff;
+}
+
+h2{
+margin-top:40px;
+font-weight:500;
+}
+
+h3{
+color:#cfcfff;
 }
 
 </style>
@@ -62,24 +146,26 @@ margin:5px 0;
 <body>
 
 
-<!-- HEADER -->
+<!-- NAVBAR -->
 
-<div class="header">
+<div class="navbar">
 
-<h2>SkillSprint Admin</h2>
+<div class="logo" onclick="goHome()">
+SkillSprint.
+</div>
 
-<div>
+<div class="nav-links">
 
-<button onclick="goHome()">Home</button>
-
-<button onclick="goCourses()">Courses</button>
-
-<button onclick="logout()">Logout</button>
+<a href="#" onclick="goHome()">Home</a>
+<a href="#" onclick="goCourses()">Courses</a>
+<a href="#" onclick="logout()">Logout</a>
 
 </div>
 
 </div>
 
+
+<div class="container">
 
 
 <!-- USERS -->
@@ -177,6 +263,7 @@ Show Requests
 <tbody id="requests"></tbody>
 
 </table>
+
 <!-- APPROVED STUDENTS -->
 
 <h2>Approved Students</h2>
@@ -201,6 +288,7 @@ Show Approved Students
 <tbody id="approved"></tbody>
 
 </table>
+
 <!-- ADD VIDEO -->
 
 <h2>Add Video</h2>
@@ -265,31 +353,31 @@ Show Approved Students
 
 </table>
 
+</div>
+
 
 
 <script>
 
-
 /* NAVIGATION */
 
 function goHome(){
-
 window.location="index.html";
-
 }
 
 function goCourses(){
-
 window.location="courses.html";
-
 }
 
 function logout(){
 
+firebase.auth().signOut().then(()=>{
+
 window.location="login.html";
 
-}
+});
 
+}
 
 
 /* LOAD USERS */
@@ -337,7 +425,6 @@ function addCourse(){
 if(courseName.value.trim()==""){
 
 alert("Enter Course Name");
-
 return;
 
 }
@@ -345,38 +432,7 @@ return;
 if(!courseImage.value.startsWith("http")){
 
 alert("Enter Valid Image URL");
-
 return;
-
-}
-
-fetch("http://localhost:3000/addCourse",{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-
-name:courseName.value.trim(),
-image:courseImage.value.trim(),
-description:courseDesc.value.trim()
-
-})
-
-})
-
-.then(res=>res.text())
-
-.then(data=>{
-
-alert(data);
-
-loadCourses();
-
-});
 
 }
 
@@ -411,6 +467,9 @@ courseDesc.value="";
 loadCourses();
 
 });
+
+}
+
 
 
 /* LOAD COURSES */
@@ -455,6 +514,8 @@ courses.innerHTML=html;
 
 }
 
+
+
 /* LOAD COURSES DROPDOWN */
 
 function loadCourseDropdown(){
@@ -475,13 +536,12 @@ html+=`<option>${course.name}</option>`;
 
 videoCourse.innerHTML=html;
 
-/* Load videos of first course */
-
 loadCourseVideos();
 
 });
 
 }
+
 
 
 function loadCourseVideos(){
@@ -526,10 +586,12 @@ courseVideos.innerHTML=html;
 
 }
 
+
+
 loadCourseDropdown();
 
-
 videoCourse.addEventListener("change",loadCourseVideos);
+
 
 
 /* DELETE COURSE */
@@ -580,7 +642,16 @@ videoId:videoId.value
 
 .then(res=>res.text())
 
-.then(data=>alert(data));
+.then(data=>{
+
+alert(data);
+
+videoTitle.value="";
+videoId.value="";
+
+loadCourseVideos();
+
+});
 
 }
 
@@ -655,6 +726,7 @@ loadVideos();
 }
 
 
+
 /* LOAD REQUESTS */
 
 function loadRequests(){
@@ -711,6 +783,7 @@ requests.innerHTML=html;
 }
 
 
+
 /* APPROVE COURSE */
 
 function approve(email,course){
@@ -738,14 +811,15 @@ course:course
 
 alert("Course Approved");
 
-loadRequests(); // refresh table
+loadRequests();
 
 });
 
 }
+
+
+
 /* LOAD APPROVED STUDENTS */
-
-
 
 function loadApproved(){
 
@@ -786,6 +860,23 @@ approved.innerHTML=html;
 });
 
 }
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBBb-HWoQ9TqwwkDk887G0oPeGvJo7hMfs",
+  authDomain: "skillsprint-a4eb3.firebaseapp.com",
+  projectId: "skillsprint-a4eb3",
+  storageBucket: "skillsprint-a4eb3.appspot.com",
+  messagingSenderId: "99219317801",
+  appId: "1:99219317801:web:85ed7c3b7d062a69216838"
+};
+
+firebase.initializeApp(firebaseConfig);
 
 </script>
 

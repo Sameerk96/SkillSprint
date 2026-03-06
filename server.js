@@ -15,13 +15,17 @@ mongoose.connect("mongodb://127.0.0.1:27017/skillsprint")
 .catch(err=>console.log(err));
 
 
-/* User Model */
+/* =========================
+   USER MODEL
+========================= */
+
 const User = mongoose.model("User",{
 
 uid:String,
 name:String,
 email:String,
 password:String,
+
 role:{type:String,default:"user"},
 
 requestedCourses:[String],
@@ -30,64 +34,79 @@ approvedCourses:[String]
 });
 
 
-/* Signup */
+/* =========================
+   SIGNUP
+========================= */
 
 app.post("/signup", async(req,res)=>{
 
-    const user = new User({
-        name:req.body.name,
-        email:req.body.email,
-        password:req.body.password,
-        role:"user"
-    });
+const exists = await User.findOne({
+email:req.body.email
+});
 
-    await user.save();
+if(exists){
+res.send("User Already Exists");
+return;
+}
 
-    res.send("User Created");
+const user = new User({
+
+name:req.body.name,
+email:req.body.email,
+password:req.body.password,
+role:"user",
+requestedCourses:[],
+approvedCourses:[]
+
+});
+
+await user.save();
+
+res.send("User Created");
 
 });
 
 
-/* Login */
+/* =========================
+   LOGIN
+========================= */
 
 app.post("/login", async(req,res)=>{
 
 const user = await User.findOne({
-    email:req.body.email,
-    password:req.body.password
+
+email:req.body.email,
+password:req.body.password
+
 });
 
 if(user){
 
-    if(user.role=="admin")
-        res.send("admin");
+if(user.role=="admin")
+res.send("admin");
 
-    else
-        res.send("user");
+else
+res.send("user");
 
-}
-else{
+}else{
+
 res.send("not found");
+
 }
 
 });
 
 
-/* Get All Users (Admin) */
-
-app.get("/users", async(req,res)=>{
-
-const users = await User.find();
-
-res.json(users);
-
-});
-/* SAVE FIREBASE USERS */
+/* =========================
+   SAVE FIREBASE USER
+========================= */
 
 app.post("/saveUser", async(req,res)=>{
 
 const exists = await User.findOne({
+
 uid:req.body.uid
+
 });
 
 if(!exists){
@@ -112,7 +131,51 @@ console.log("User saved in MongoDB");
 res.send("saved");
 
 });
-/* COURSE MODEL */
+
+
+/* =========================
+   CHECK USER ROLE
+========================= */
+
+app.get("/checkRole/:email", async(req,res)=>{
+
+const user = await User.findOne({
+email:req.params.email
+});
+
+if(user){
+
+res.json({
+role:user.role
+});
+
+}else{
+
+res.json({
+role:"user"
+});
+
+}
+
+});
+
+
+/* =========================
+   GET ALL USERS
+========================= */
+
+app.get("/users", async(req,res)=>{
+
+const users = await User.find();
+
+res.json(users);
+
+});
+
+
+/* =========================
+   COURSE MODEL
+========================= */
 
 const Course = mongoose.model("Course",{
 
@@ -122,7 +185,10 @@ description:String
 
 });
 
-/* VIDEO MODEL */
+
+/* =========================
+   VIDEO MODEL
+========================= */
 
 const Video = mongoose.model("Video",{
 
@@ -133,14 +199,15 @@ videoId:String
 });
 
 
-/* ADD COURSE */
+/* =========================
+   ADD COURSE
+========================= */
 
 app.post("/addCourse",async(req,res)=>{
 
 if(!req.body.name){
 
 res.send("Course Name Required");
-
 return;
 
 }
@@ -154,7 +221,6 @@ name:req.body.name
 if(exists){
 
 res.send("Course Already Exists");
-
 return;
 
 }
@@ -174,7 +240,9 @@ res.send("Course Added");
 });
 
 
-/* GET COURSES */
+/* =========================
+   GET COURSES
+========================= */
 
 app.get("/courses",async(req,res)=>{
 
@@ -185,42 +253,9 @@ res.json(courses);
 });
 
 
-/* ADD VIDEO */
-
-app.post("/addVideo",async(req,res)=>{
-
-const video = new Video({
-
-course:req.body.course,
-title:req.body.title,
-videoId:req.body.videoId
-
-});
-
-await video.save();
-
-res.send("Video Added");
-
-});
-
-
-/* GET VIDEOS */
-
-app.get("/videos/:course",async(req,res)=>{
-
-const videos = await Video.find({
-
-course:req.params.course
-
-});
-
-res.json(videos);
-
-});
-
-
-
-/* DELETE COURSE */
+/* =========================
+   DELETE COURSE
+========================= */
 
 app.delete("/deleteCourse/:name", async(req,res)=>{
 
@@ -241,7 +276,47 @@ res.send("Course Deleted");
 });
 
 
-/* DELETE VIDEO */
+/* =========================
+   ADD VIDEO
+========================= */
+
+app.post("/addVideo",async(req,res)=>{
+
+const video = new Video({
+
+course:req.body.course,
+title:req.body.title,
+videoId:req.body.videoId
+
+});
+
+await video.save();
+
+res.send("Video Added");
+
+});
+
+
+/* =========================
+   GET VIDEOS BY COURSE
+========================= */
+
+app.get("/videos/:course",async(req,res)=>{
+
+const videos = await Video.find({
+
+course:req.params.course
+
+});
+
+res.json(videos);
+
+});
+
+
+/* =========================
+   DELETE VIDEO
+========================= */
 
 app.delete("/deleteVideo/:id", async(req,res)=>{
 
@@ -256,7 +331,9 @@ res.send("Video Deleted");
 });
 
 
-/* GET ALL VIDEOS */
+/* =========================
+   GET ALL VIDEOS
+========================= */
 
 app.get("/allVideos", async(req,res)=>{
 
@@ -266,39 +343,22 @@ res.json(videos);
 
 });
 
-app.post("/approveCourse", async(req,res)=>{
+
+/* =========================
+   REQUEST COURSE
+========================= */
+
+app.post("/requestCourse", async(req,res)=>{
 
 await User.updateOne(
 
 {email:req.body.email},
 
 {
-
-$addToSet:{approvedCourses:req.body.course},
-
-$pull:{requestedCourses:req.body.course}
-
+$addToSet:{
+requestedCourses:req.body.course
 }
-
-);
-
-res.send("Approved");
-
-});
-
-
-
-/* REQUEST COURSE */
-
-app.post("/requestCourse", async(req,res)=>{
-
-console.log("Incoming Request:", req.body);
-
-await User.updateOne(
-
-{email:req.body.email},
-
-{$addToSet:{requestedCourses:req.body.course}}
+}
 
 );
 
@@ -307,7 +367,9 @@ res.send("Request Saved");
 });
 
 
-/* GET REQUESTS */
+/* =========================
+   GET COURSE REQUESTS
+========================= */
 
 app.get("/requests", async(req,res)=>{
 
@@ -320,7 +382,40 @@ requestedCourses:{$exists:true,$ne:[]}
 res.json(users);
 
 });
-/* CHECK ACCESS */
+
+
+/* =========================
+   APPROVE COURSE
+========================= */
+
+app.post("/approveCourse", async(req,res)=>{
+
+await User.updateOne(
+
+{email:req.body.email},
+
+{
+
+$addToSet:{
+approvedCourses:req.body.course
+},
+
+$pull:{
+requestedCourses:req.body.course
+}
+
+}
+
+);
+
+res.send("Approved");
+
+});
+
+
+/* =========================
+   CHECK COURSE ACCESS
+========================= */
 
 app.get("/checkAccess", async(req,res)=>{
 
@@ -330,8 +425,13 @@ email:req.query.email
 
 });
 
-if(user && user.approvedCourses &&
-user.approvedCourses.includes(req.query.course)){
+if(
+
+user &&
+user.approvedCourses &&
+user.approvedCourses.includes(req.query.course)
+
+){
 
 res.send("yes");
 
@@ -344,8 +444,12 @@ res.send("no");
 });
 
 
+/* =========================
+   START SERVER
+========================= */
+
 app.listen(3000,()=>{
 
-console.log("Server Running");
+console.log("Server Running on http://localhost:3000");
 
 });
